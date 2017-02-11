@@ -4,6 +4,7 @@ import os
 
 # Thirdparty imports
 import flask
+from flask_session import Session
 
 # Local imports
 import config
@@ -11,6 +12,13 @@ from hangmanapp import MainRoute
 
 
 app = flask.Flask(__name__)
+
+app.config['SECRET_KEY'] = config.SECRET_KEY
+app.config['SESSION_TYPE'] = config.SESSION_TYPE
+
+Session(app)
+
+
 app.register_blueprint(MainRoute)
 
 if os.environ.get('WERKZEUG_RUN_MAIN') == None:
