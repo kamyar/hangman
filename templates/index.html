@@ -1,7 +1,9 @@
 {% extends "common/base.html" %}
 {% block content %}
 
-    {# Page header and navbar #}
+    <script> 
+        var GameModule = {{context|tojson|safe}} || {}; 
+    </script>
 
     {# Page main body structure and content #}
     <div id="game-div"></div>
