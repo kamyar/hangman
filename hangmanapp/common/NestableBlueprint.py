@@ -26,7 +26,6 @@ class NestableBlueprint(Blueprint):
     def register_method_view(self, *args, **kwargs):
         def wrapper(method_view):
             name = method_view.__name__
-            print("registering ", name)
             self.add_url_rule(*args, view_func=method_view.as_view(name), **kwargs)
             return method_view
         return wrapper

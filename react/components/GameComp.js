@@ -69,14 +69,17 @@ export default class GameComp extends React.Component {
                     msg: "Wrong guess, sorry!",
                     is_error: true,
                 };
-            } else {
-                if (response.word_completed) {
-                    newState.feedback = {
-                        msg: "Hey! Congrats, you found it!",
-                        is_error: false,
-                    }
+            } else if (response.word_completed) {
+                newState.feedback = {
+                    msg: "Hey! Congrats, you found it!",
+                    is_error: false,
                 }
-            }
+            } else if(response.char_exists) {
+                newState.feedback = {
+                    msg: "Yay, that exists!",
+                    is_error: false,
+                };
+            } 
             Object.assign(newState, response)
             that.setState(newState);
         }).catch(function(err) {
