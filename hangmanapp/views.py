@@ -1,3 +1,7 @@
+"""
+    Hangman Game views endpoint
+"""
+
 
 import json
 

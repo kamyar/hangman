@@ -1,4 +1,6 @@
-
+"""
+    Hangman Flask App config values
+"""
 import os
 
 is_debug = True
