@@ -18,15 +18,17 @@ class MainView(flask.views.MethodView):
         context = {
             'app_name': "Awesome Hangman"
         }
+        context['word_partial'] = ['_'] * len(session['word_complete'])
+
         return render_template("index.html", context=context)
 
-
+# TODO: also return total wrong guesses
 @MainRoute.register_method_view('/guess')
 class GuessView(flask.views.MethodView):
     def post(self):
         context = {}
-
-        guess_char = request.get_json().get("guess_char", '').lower()
+        data = json.loads(request.data)
+        guess_char = data.get("guess_char", '').lower()
         is_valid, error = utils.is_char_valid(guess_char)
 
         # is the char valid?
@@ -49,6 +51,7 @@ class GuessView(flask.views.MethodView):
             }
 
         context['word_partial'] = [char if char in session['guessed_chars'] else '_' for char in session['word_complete']]
+        context['guessed_chars'] = session['guessed_chars']
         # is the word reavealed completely?
         if '_' not in context['word_partial']:
             context['word_completed'] = True
