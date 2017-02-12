@@ -122,7 +122,7 @@ export default class GameComp extends React.Component {
         }
 
         this.setState({
-            guess_char: e.target.value,
+            guess_char: guess_char,
             feedback: {
                 msg: "Look good, should we check it?",
                 is_error: false,
