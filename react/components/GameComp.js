@@ -91,7 +91,7 @@ export default class GameComp extends React.Component {
         /*
             Handle input field value change(and its validity)
         */
-        var alphanumRegex = /^[a-z0-9]$/
+        var alphanumRegex = /^[a-zA-Z0-9]$/
         var guess_char = this.refs.guess_input.value;
         if (!guess_char) {
             this.setState({
