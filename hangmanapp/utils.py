@@ -3,24 +3,30 @@ import random
 
 from flask import session
 
-from .config import words
+from . import config
 
 
 def choose_target_word():
-    return random.choice(words)
+    return random.choice(config.words)
 
 
-def handle_word():
+def handle_word_selection():
+    """
+        Choose a word and set related session fields
+    """
     if not 'word_complete' in session:
         chosen_word = choose_target_word()
         session['word_complete'] = chosen_word
         session['wrong_guess_count'] = 0
         session['guessed_chars'] = []
     else:
-        print "already selected", session['word_complete']
+        pass
 
 
 def is_char_valid(char):
+    """
+        Backend validation of the guessed char
+    """
     error = None
     if not char.isalnum():
         error =  {
@@ -42,4 +48,28 @@ def is_char_valid(char):
         return False, error
     else:
         return True, {}
+
+def get_game_context():
+    """
+        Provide common game state info
+    """
+    context = {}
+    context['app_name'] = "Awesome Hangman"
+    context['word_partial'] = [char if char in session['guessed_chars'] else '_' for char in session['word_complete']]
+    context['guessed_chars'] = session['guessed_chars']
+    context['wrong_guess_count'] = session['wrong_guess_count']
+    context['max_wrong_guess_count'] = config.max_wrong_guess_count
+    if '_' not in context['word_partial']:
+        context['word_completed'] = True
+    else:
+        context['word_completed'] = False
+
+    if session['wrong_guess_count'] >= config.max_wrong_guess_count:
+        context['failed'] = True
+    else:
+        context['failed'] = False
+
+
+    return context
+
 

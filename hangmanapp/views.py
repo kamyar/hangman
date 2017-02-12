@@ -8,21 +8,15 @@ from common.NestableBlueprint import NestableBlueprint
 
 from . import utils, config
 
-
 MainRoute = NestableBlueprint('main', __name__, url_prefix="")
 
 @MainRoute.register_method_view('/')
 class MainView(flask.views.MethodView):
     def get(self):
-        utils.handle_word()
-        context = {
-            'app_name': "Awesome Hangman"
-        }
-        context['word_partial'] = ['_'] * len(session['word_complete'])
-
+        utils.handle_word_selection()
+        context = utils.get_game_context()
         return render_template("index.html", context=context)
 
-# TODO: also return total wrong guesses
 @MainRoute.register_method_view('/guess')
 class GuessView(flask.views.MethodView):
     def post(self):
@@ -49,12 +43,18 @@ class GuessView(flask.views.MethodView):
                 'msg': "You reached your max guesses",
                 'code': 1001
             }
+            context['failed'] = True
 
-        context['word_partial'] = [char if char in session['guessed_chars'] else '_' for char in session['word_complete']]
-        context['guessed_chars'] = session['guessed_chars']
-        # is the word reavealed completely?
-        if '_' not in context['word_partial']:
-            context['word_completed'] = True
-
+        context.update(utils.get_game_context())
         return jsonify(context)
 
+@MainRoute.register_method_view('/reset')
+class ResetView(flask.views.MethodView):
+    def post(self):
+        # clear session
+        session.clear()
+        # reset word selection and other game vars
+        utils.handle_word_selection()
+        # get the current context for the game
+        context = utils.get_game_context()
+        return jsonify(context)
