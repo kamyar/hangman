@@ -208,6 +208,9 @@ export default class GameComp extends React.Component {
         return (
             <div className="flex-set flex--content-around flex--column">
                 <div className="flex-set flex--content-around">
+                    <img src={`/static/img/Hangman-${this.state.wrong_guess_count}.png`} alt=""/>
+                </div>
+                <div className="flex-set flex--content-around">
                     <div className="flex-set flex--content-around game-inner" >
                         {this.getWordComp()}
                     </div>

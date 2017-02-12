@@ -67,7 +67,8 @@ target/
 react/node_modules/
 
 # Ignore geenrated js&css bundles
-static/
+static/js
+static/css
 
 # Ignore flask session extension session files
 flask_session
