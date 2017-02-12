@@ -9,60 +9,99 @@ export default class GameComp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            partial_word: this.props.partial_word,
-            wrongGuessCount: 0,
-            feedback: {},
-        };
+        var state = {
+            feedback : {}
+        }
+        Object.assign(state, props)
+        this.state = state;
         this._bind([
             'guessInputHandler',
             'getGuessComp',
             'submitGuess',
+            'resetGame',
         ]);
     }
 
+    resetGame() {
+        /*
+            Submit reset request to backend
+        */
+        var that = this;
+        fetch('/reset', {
+            method: 'post',
+            credentials: 'include' 
+        }).then(response => response.json())
+        .then(function(response) {
+            that.setState({
+                failed: false,
+                word_completed: false,
+                word_partial: response.word_partial,
+                guessed_chars: [],
+            });
+        }).catch(function(err) {
+            console.log(err);
+        });
+    }
+
     submitGuess() {
-        console.log("will check");
+        /*
+            Submit the guess to backend
+        */
+        var that = this;
         fetch('/guess', {
             method: 'post',
             body: JSON.stringify({
-                guess_char: this.state.guessChar
+                guess_char: that.state.guess_char
             }),
             credentials: 'include' 
         }).then(response => response.json())
         .then(function(response) {
-            console.log(response);
-            if (response.error && response.error.msg) {
-                this.setState({
-                    guessChar: '',
-                    feedback: response.error.msg
-                });
-            } else if(!response.char_exists) {
-               this.setState({
-                   guessChar: '',
-                   feedback: "Wrong guess, sorry!"
-               }); 
+            var newState = {
+                guess_char: ''
             }
-            // TODO:
-            // set partial_word
-            // give feedback
-            // check error
+            if (response.failed) {
+                that.setState({
+                    failed: true,
+                });
+            } else if (response.error && response.error.msg) {
+                newState.feedback = {
+                    msg: response.error.msg,
+                    is_error: true,
+                };
+            } else if(!response.char_exists) {
+                newState.feedback = {
+                    msg: "Wrong guess, sorry!",
+                    is_error: true,
+                };
+            } else {
+                if (response.word_completed) {
+                    newState.feedback = {
+                        msg: "Hey! Congrats, you found it!",
+                        is_error: false,
+                    }
+                }
+            }
+            Object.assign(newState, response)
+            that.setState(newState);
         }).catch(function(err) {
             console.log(err);
         });
     }
 
     guessInputHandler(e) {
+        /*
+            Handle input field value change(and its validity)
+        */
         var alphanumRegex = /^[a-z0-9]$/
-        var guessChar = e.target.value;
-        if (!guessChar) {
+        var guess_char = e.target.value;
+        if (!guess_char) {
             this.setState({
-                guessChar: '',
+                guess_char: '',
                 feedback: {}
             });
             return;
         }
-        if (!alphanumRegex.test(guessChar)) {
+        if (!alphanumRegex.test(guess_char)) {
             this.setState({
                 feedback: {
                     msg: "Guess should be alphanumeric!",
@@ -71,9 +110,18 @@ export default class GameComp extends React.Component {
             });
             return;
         }
+        if (this.state.guessed_chars.indexOf(guess_char) > -1) {
+            this.setState({
+                feedback: {
+                    msg: "Already guessed it, try another!",
+                    is_error: true,
+                }
+            });
+            return;
+        }
 
         this.setState({
-            guessChar: e.target.value,
+            guess_char: e.target.value,
             feedback: {
                 msg: "Look good, should we check it?",
                 is_error: false,
@@ -82,6 +130,9 @@ export default class GameComp extends React.Component {
     }
 
     getFeedbackComp() {
+        /*
+            Show feedback about the latest development in game state
+        */
         var feedbackComp;
         if (this.state.feedback && this.state.feedback.msg) {
             var feedbackClass = this.state.feedback.is_error ? 'error':'success';
@@ -96,7 +147,10 @@ export default class GameComp extends React.Component {
 
 
     getWordComp() {
-        var wordComp = this.state.partial_word.map(function(v, i) {
+        /*
+            Show current state of the word
+        */
+        var wordComp = this.state.word_partial.map(function(v, i) {
             return (
                 <div key={i} className="game-char">
                     {v}
@@ -107,26 +161,53 @@ export default class GameComp extends React.Component {
     }
 
     getGuessComp() {
+        /*
+            Show input field and buttons
+        */
         return (
             <div className="flex-set flex--content-center">
                 <input
                     type="text"
                     onChange={this.guessInputHandler} 
                     maxLength={1} 
-                    defaultValue={this.state.guessChar}>
+                    disabled={this.state.failed || this.state.word_completed}>
                 </input>
                 <button 
                     onClick={this.submitGuess}
-                    disabled={!this.state.guessChar}
-                    >
+                    disabled={!this.state.guess_char}>
                     Let check this
+                </button>
+                <button 
+                    onClick={this.resetGame}>
+                    Reset
                 </button>
             </div>
         )
     }
 
+    getAlreadyGuessedCharComp() {
+        /*
+            Show already guessed chars
+        */
+        var guessedCharsComp = this.state.guessed_chars.map(function(v, i) {
+            return (
+                <div key={i} style={{minWidth:"50px"}}>
+                    {v}
+                </div>
+            )
+        })
+        return (
+            <div className="flex-set flex--content-around flex--wrap">
+                {guessedCharsComp}
+            </div>
+        )
+    }
+
     render() {
-        // console.log(this.props.partial_word);
+        var statusText = `${this.state.wrong_guess_count} wrong guesses out of ${this.state.max_wrong_guess_count}`;
+        if (this.state.failed) {
+            var statusText = `You reached maximum wrong guess of ${this.state.max_wrong_guess_count}, try again? :)`;
+        }
         return (
             <div className="flex-set flex--content-around flex--column">
                 <div className="flex-set flex--content-around">
@@ -135,6 +216,10 @@ export default class GameComp extends React.Component {
                     </div>
                 </div>
                 {this.getGuessComp()}
+                <div className="flex-set flex--content-center status-comp">
+                    {statusText}
+                </div>
+                {this.getAlreadyGuessedCharComp()}
                 {this.getFeedbackComp()}
 
             </div>

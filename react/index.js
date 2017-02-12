@@ -4,6 +4,6 @@ import ReactDOM from 'react-dom';
 import GameComp from './components/GameComp';
 
 ReactDOM.render(
-    <GameComp partial_word={GameModule.word_partial}/>,
+    <GameComp {...GameModule}/>,
     document.getElementById(`game-div`)
 );
