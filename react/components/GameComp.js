@@ -1,7 +1,6 @@
 
 import React from "react";
 
-
 export default class GameComp extends React.Component {
     _bind(methods) {
         methods.forEach((method) => this[method] = this[method].bind(this));
@@ -47,6 +46,7 @@ export default class GameComp extends React.Component {
         /*
             Submit the guess to backend
         */
+        this.refs.guess_input.value = '';
         var that = this;
         fetch('/guess', {
             method: 'post',
@@ -88,12 +88,12 @@ export default class GameComp extends React.Component {
         });
     }
 
-    guessInputHandler(e) {
+    guessInputHandler() {
         /*
             Handle input field value change(and its validity)
         */
         var alphanumRegex = /^[a-z0-9]$/
-        var guess_char = e.target.value;
+        var guess_char = this.refs.guess_input.value;
         if (!guess_char) {
             this.setState({
                 guess_char: '',
@@ -168,6 +168,7 @@ export default class GameComp extends React.Component {
             <div className="flex-set flex--content-center">
                 <input
                     type="text"
+                    ref="guess_input"
                     onChange={this.guessInputHandler} 
                     maxLength={1} 
                     disabled={this.state.failed || this.state.word_completed}>
