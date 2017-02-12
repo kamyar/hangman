@@ -31,12 +31,7 @@ export default class GameComp extends React.Component {
             credentials: 'include' 
         }).then(response => response.json())
         .then(function(response) {
-            that.setState({
-                failed: false,
-                word_completed: false,
-                word_partial: response.word_partial,
-                guessed_chars: [],
-            });
+            that.setState(response);
         }).catch(function(err) {
             console.log(err);
         });
