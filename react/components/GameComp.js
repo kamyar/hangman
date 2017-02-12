@@ -208,6 +208,14 @@ export default class GameComp extends React.Component {
         if (this.state.failed) {
             var statusText = `You reached maximum wrong guess of ${this.state.max_wrong_guess_count}, try again? :)`;
         }
+        var answerComp;
+        if (this.state.word) {
+            answerComp = (
+                <div className="flex-set flex--content-center status-comp">
+                    Answer was '{this.state.word}'! <br />
+                </div>
+            )
+        }
         return (
             <div className="flex-set flex--content-around flex--column">
                 <div className="flex-set flex--content-around">
@@ -222,6 +230,7 @@ export default class GameComp extends React.Component {
                 <div className="flex-set flex--content-center status-comp">
                     {statusText}
                 </div>
+                {answerComp}
                 {this.getAlreadyGuessedCharComp()}
                 {this.getFeedbackComp()}
 

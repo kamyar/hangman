@@ -68,8 +68,10 @@ def get_game_context():
 
     if session['wrong_guess_count'] >= config.max_wrong_guess_count:
         context['failed'] = True
+        context['word'] = session['word_complete']
     else:
         context['failed'] = False
+        context['word'] = ''
 
 
     return context
