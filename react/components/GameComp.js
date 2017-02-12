@@ -60,9 +60,10 @@ export default class GameComp extends React.Component {
                 guess_char: ''
             }
             if (response.failed) {
-                that.setState({
-                    failed: true,
-                });
+                newState.feedback = {
+                    msg: "Game Over! :(",
+                    is_error: true,
+                }
             } else if (response.error && response.error.msg) {
                 newState.feedback = {
                     msg: response.error.msg,
